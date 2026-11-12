@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoC Clúster PWA - Fase 0</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 480px; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        .header h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 0.5rem; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; background: #e0f2fe; color: #0369a1; }
+        .node-box { background: #2563eb; color: white; padding: 1.25rem; border-radius: 8px; text-align: center; margin: 1.5rem 0; font-weight: bold; font-size: 1.2rem; }
+        .node-box.highlight { animation: pulse 0.4s ease-in-out; }
+        .info-group { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.9rem; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .info-row:last-child { margin-bottom: 0; }
+        .label { font-weight: 600; color: #64748b; }
+        .btn { width: 100%; padding: 0.75rem; border: none; background: #0f172a; color: white; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: #334155; }
+        .pwa-status { font-size: 0.8rem; text-align: center; color: #16a34a; margin-top: 1rem; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <span class="badge" id="envBadge">Entorno: Intranet</span>
+            <h1>Prueba de Concepto (PoC)</h1>
+            <p style="font-size: 0.85rem; color: #64748b;">Balanceo de 3 Nodos & JWT Stateless</p>
+        </div>
+
+        <div class="node-box" id="nodeBox">
+            Cargando nodo...
+        </div>
+
+        <div class="info-group">
+            <div class="info-row">
+                <span class="label">ID de Sesión (JWT):</span>
+                <span id="userId">--</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Rol:</span>
+                <span id="userRole">--</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Hora de Petición:</span>
+                <span id="time">--</span>
+            </div>
+        </div>
+
+        <button class="btn" onclick="fetchInfo()">Probar Siguiente Petición (Round-Robin)</button>
+        <p class="pwa-status" id="pwaStatus">✔ Service Worker PWA Activo & Offline Ready</p>
+    </div>
+
+    <script>
+        async function fetchInfo() {
+            try {
+                const res = await fetch('/api/info');
+                const data = await res.json();
+                
+                const box = document.getElementById('nodeBox');
+                box.innerText = 'Atendido por: ' + data.handledBy;
+                box.classList.remove('highlight');
+                void box.offsetWidth;
+                box.classList.add('highlight');
+
+                document.getElementById('userId').innerText = data.user ? data.user.id : 'Sin sesión';
+                document.getElementById('userRole').innerText = data.user ? data.user.role : 'Invitado';
+                document.getElementById('time').innerText = data.timestamp;
+                document.getElementById('envBadge').innerText = 'Entorno: ' + data.environment;
+            } catch (err) {
+                document.getElementById('nodeBox').innerText = 'Error de Conexión';
+            }
+        }
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(() => {
+                console.log('PWA Service Worker Registrado con éxito');
+            });
+        }
+
+        fetchInfo();
+    </script>
+</body>
+</html>

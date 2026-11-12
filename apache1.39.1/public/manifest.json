@@ -1,0 +1,20 @@
+{
+  "short_name": "PoC Clúster",
+  "name": "Prueba de Concepto - Clúster PWA",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://via.placeholder.com/512",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f1f5f9",
+  "theme_color": "#2563eb",
+  "display": "standalone"
+}
